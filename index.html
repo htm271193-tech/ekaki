@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>えかきタイプ診断｜32タイプ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Yusei+Magic&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FFFFFF; --grid:#D6EAF5; --ink:#232733; --sub:#5C6475; --card:#FFFFFFEE;
+  --c-o:#FF5C8D; --c-c:#2E9CD6; --c-e:#FFB21E; --c-a:#3DBA6B; --c-n:#8A63DB;
+  --agree:#FF5C8D; --disagree:#2E9CD6; --shadow:rgba(35,39,51,.12); --line:#232733;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#191C23; --grid:#262D3B; --ink:#EEF0F6; --sub:#A6ADBD; --card:#20242DEE;
+    --shadow:rgba(0,0,0,.35); --line:#EEF0F6;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#191C23; --grid:#262D3B; --ink:#EEF0F6; --sub:#A6ADBD; --card:#20242DEE;
+  --shadow:rgba(0,0,0,.35); --line:#EEF0F6;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0; min-height:100%; color:var(--ink); background:var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:26px 26px;
+  font-family:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;
+  font-size:16px; line-height:1.75;
+}
+.hand{font-family:"Yusei Magic","Zen Maru Gothic","Hiragino Maru Gothic ProN",sans-serif;font-weight:400}
+.wrap{max-width:640px;margin:0 auto;padding:24px 18px 56px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible,.blob:focus-visible{outline:3px dashed var(--c-c);outline-offset:3px}
+[hidden]{display:none!important}
+
+/* hero */
+.hero{text-align:center;padding-top:12px}
+.hero h1{font-size:clamp(2.4rem,11vw,3.6rem);line-height:1.1;margin:8px 0 6px;letter-spacing:.02em}
+.hero h1 span{display:inline-block}
+.hero h1 span:nth-child(1){color:var(--c-o);transform:rotate(-4deg)}
+.hero h1 span:nth-child(2){color:var(--c-c);transform:rotate(3deg)}
+.hero h1 span:nth-child(3){color:var(--c-e);transform:rotate(-2deg)}
+.hero h1 span:nth-child(4){color:var(--c-a);transform:rotate(4deg)}
+.hero .lead{color:var(--sub);margin:0 auto 4px;max-width:30em}
+.stage{position:relative;width:min(300px,78vw);margin:10px auto 0;background:none;border:0;padding:0;display:block}
+.stage svg{width:100%;height:auto;display:block}
+.stage.pop svg{animation:pop .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{0%{transform:scale(.8) rotate(-6deg)}100%{transform:scale(1) rotate(0)}}
+.stage-name{font-size:1.25rem;margin:0}
+.stage-hint{font-size:.8rem;color:var(--sub);margin:0 0 18px}
+.btns{display:flex;flex-direction:column;gap:12px;align-items:center}
+.btn{
+  border:3px solid var(--line);background:var(--c-e);color:#232733;border-radius:18px 22px 16px 24px;
+  padding:14px 28px;font-weight:700;font-size:1.08rem;min-width:240px;box-shadow:4px 5px 0 var(--line);
+  transition:transform .1s, box-shadow .1s;
+}
+.btn:active{transform:translate(3px,4px);box-shadow:1px 1px 0 var(--line)}
+.btn.ghost{background:var(--paper);color:var(--ink)}
+.btn.line{background:#06C755;color:#fff;text-decoration:none;display:inline-block}
+.btn.small{min-width:0;padding:10px 18px;font-size:.95rem}
+.axes-intro{margin:34px 0 0;display:grid;gap:10px}
+.axes-intro div{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:10px 14px;display:flex;gap:12px;align-items:center}
+.dot{width:18px;height:18px;border-radius:50%;flex:0 0 auto;border:2px solid var(--line)}
+.axes-intro b{display:block;font-size:.95rem}
+.axes-intro small{color:var(--sub);font-size:.85rem;line-height:1.5;display:block}
+.note{font-size:.78rem;color:var(--sub);text-align:center;margin-top:28px;line-height:1.6}
+
+/* quiz */
+.qtop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.back{background:none;border:0;color:var(--sub);padding:6px 4px;font-size:.95rem}
+.count{font-size:1.1rem}
+.progress{display:grid;grid-template-columns:repeat(20,1fr);gap:4px;margin:10px 0 26px}
+.progress i{height:8px;border-radius:4px;background:var(--grid);border:1px solid var(--line);opacity:.5}
+.progress i.done{opacity:1}
+.qcard{background:var(--card);border:3px solid var(--line);border-radius:22px 18px 26px 16px;padding:26px 20px 24px;box-shadow:5px 6px 0 var(--line);position:relative}
+.qtag{display:inline-block;font-size:.8rem;font-weight:700;padding:2px 12px;border-radius:999px;border:2px solid var(--line);color:#232733;margin-bottom:12px}
+.qtext{font-size:clamp(1.15rem,5vw,1.4rem);font-weight:700;line-height:1.6;margin:0 0 26px;min-height:3.2em}
+.scale{display:flex;align-items:center;justify-content:space-between;gap:4px}
+.blob{border:3px solid var(--line);border-radius:50%;padding:0;background:transparent;flex:0 0 auto;transition:transform .12s}
+.blob:hover{transform:scale(1.08)}
+.blob.sel{transform:scale(1.12)}
+.blob[data-v="3"],.blob[data-v="-3"]{width:54px;height:54px}
+.blob[data-v="2"],.blob[data-v="-2"]{width:44px;height:44px}
+.blob[data-v="1"],.blob[data-v="-1"]{width:34px;height:34px}
+.blob[data-v^="-"].sel{background:var(--disagree)}
+.blob:not([data-v^="-"]).sel{background:var(--agree)}
+.blob[data-v^="-"]{border-color:var(--disagree)}
+.blob:not([data-v^="-"]){border-color:var(--agree)}
+.scale-labels{display:flex;justify-content:space-between;font-size:.85rem;font-weight:700;margin-top:10px}
+.scale-labels span:first-child{color:var(--agree)}
+.scale-labels span:last-child{color:var(--disagree)}
+
+/* result */
+.rhead{text-align:center}
+.rhead .kicker{color:var(--sub);margin:0}
+.rhead svg{width:min(280px,72vw);height:auto;display:block;margin:0 auto}
+.rname{font-size:clamp(2rem,9vw,2.8rem);line-height:1.25;margin:4px 0 6px}
+.rcatch{font-weight:700;margin:0 auto 14px;max-width:26em}
+.chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.chip{font-size:.82rem;font-weight:700;padding:3px 12px;border-radius:999px;border:2px solid var(--line);color:#232733}
+.code{font-size:.85rem;color:var(--sub);letter-spacing:.2em;margin-top:8px}
+.sec{margin-top:30px;background:var(--card);border:3px solid var(--line);border-radius:20px 16px 24px 18px;padding:20px 18px}
+.sec h2{font-size:1.35rem;margin:0 0 14px;font-weight:400}
+.bar{margin-bottom:16px}
+.bar:last-child{margin-bottom:0}
+.bar-top{display:flex;justify-content:space-between;font-size:.85rem;font-weight:700}
+.bar-top .win{text-decoration:underline wavy;text-underline-offset:4px}
+.track{position:relative;height:14px;border:2px solid var(--line);border-radius:8px;background:var(--paper);margin-top:4px;overflow:hidden}
+.track b{position:absolute;inset:0 auto 0 0;border-radius:6px 0 0 6px}
+.bar small{display:block;font-size:.75rem;color:var(--sub);text-align:center}
+.trait{display:flex;gap:12px;margin-bottom:14px}
+.trait:last-child{margin-bottom:0}
+.trait .dot{margin-top:6px}
+.trait b{display:block}
+.trait p{margin:2px 0 0;font-size:.95rem}
+.aru{list-style:none;margin:0;padding:0}
+.aru li{padding:9px 0 9px 32px;position:relative;border-bottom:2px dashed var(--grid);font-size:.98rem}
+.aru li:last-child{border-bottom:0}
+.aru li::before{content:"";position:absolute;left:2px;top:13px;width:18px;height:18px;border:2.5px solid var(--line);border-radius:5px}
+.aru li::after{content:"";position:absolute;left:7px;top:12px;width:8px;height:14px;border:solid var(--c-o);border-width:0 4px 4px 0;transform:rotate(40deg)}
+.quote{position:relative;display:inline-block;background:var(--paper);border:3px solid var(--line);border-radius:22px;padding:8px 18px;font-size:1.1rem;margin:0 auto 6px;max-width:92%}
+.quote::after{content:"";position:absolute;left:50%;bottom:-12px;width:18px;height:18px;background:var(--paper);border-right:3px solid var(--line);border-bottom:3px solid var(--line);transform:translateX(-50%) rotate(45deg)}
+.sec .intro{font-size:.9rem;color:var(--sub);margin:-6px 0 12px}
+.pts{list-style:none;margin:0;padding:0}
+.pts li{display:flex;gap:10px;padding:8px 0;border-bottom:2px dashed var(--grid);font-size:.96rem}
+.pts li:last-child{border-bottom:0}
+.pts .mk{flex:0 0 auto;width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:.8rem;font-weight:700;color:#232733;margin-top:2px}
+.pts small{display:block;font-size:.75rem;color:var(--sub);font-weight:700}
+.odai{display:grid;gap:10px}
+.odai div{border:2.5px dashed var(--line);border-radius:14px;padding:10px 14px;font-weight:700;background:var(--paper)}
+.odai small{display:block;font-weight:500;color:var(--sub);font-size:.78rem}
+.pals{display:grid;gap:10px}
+.deep p{margin:0 0 6px;font-size:1rem;line-height:1.95}
+.deep h3{font-size:1rem;margin:18px 0 4px;padding-left:10px;border-left:5px solid var(--c-o)}
+.pal .role{display:inline-block;font-size:.72rem;font-weight:700;border:2px solid var(--line);border-radius:999px;padding:0 8px;margin-bottom:2px}
+.pal{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--paper);border:2px solid var(--line);border-radius:16px;padding:8px 12px}
+.pal svg{width:84px;height:84px;flex:0 0 auto}
+.pal b{display:block;font-size:1.1rem}
+.pal small{color:var(--sub);font-size:.85rem;line-height:1.5;display:block}
+.rbtns{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:28px}
+.toast{text-align:center;font-size:.85rem;color:var(--c-a);min-height:1.4em;margin-top:8px}
+
+/* zukan */
+.zhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.zhead h2{font-size:1.8rem;margin:0;font-weight:400}
+.zfilter{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 18px}
+.zfilter button{border:2px solid var(--line);background:var(--paper);border-radius:999px;padding:3px 12px;font-size:.82rem;font-weight:700}
+.zfilter button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.zc{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:8px 8px 12px;text-align:center}
+.zc svg{width:100%;height:auto;display:block}
+.zc b{display:block;font-size:.92rem;line-height:1.4}
+.zc small{color:var(--sub);font-size:.72rem;letter-spacing:.15em}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<section class="view" id="home">
+  <div class="wrap">
+    <div class="hero">
+      <h1 class="hand"><span>え</span><span>か</span><span>き</span><span>タ</span>イプ診断</h1>
+      <p class="lead">20の質問で、あなたの描き方・絵との向き合い方を32タイプに分けます。所要時間はだいたい3分。</p>
+      <button class="stage" id="stage" aria-label="別のタイプのキャラクターを表示"></button>
+      <p class="stage-name hand" id="stageName"></p>
+      <p class="stage-hint">キャラをタップすると他のタイプに変わります</p>
+      <div class="btns">
+        <button class="btn" id="startBtn">診断をはじめる</button>
+        <button class="btn ghost" id="lastBtn" hidden>前回の結果を見る</button>
+        <button class="btn ghost" id="zukanBtn">32タイプ図鑑を見る</button>
+      </div>
+    </div>
+
+    <div class="axes-intro" id="axesIntro"></div>
+
+    <p class="note">心理学のビッグファイブ（性格の5因子）の考え方をもとに、絵描き向けにアレンジした“あそびの診断”です。<br>学術的に検証された検査ではないので、ゆるく楽しんでください。</p>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section class="view" id="quiz" hidden>
+  <div class="wrap">
+    <div class="qtop">
+      <button class="back" id="qBack">もどる</button>
+      <span class="count hand" id="qCount">1 / 20</span>
+      <span style="width:48px"></span>
+    </div>
+    <div class="progress" id="progress"></div>
+    <div class="qcard">
+      <span class="qtag" id="qTag"></span>
+      <p class="qtext" id="qText"></p>
+      <div class="scale" id="scale" role="group" aria-label="どのくらい当てはまるか"></div>
+      <div class="scale-labels"><span>あてはまる</span><span>あてはまらない</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- RESULT -->
+<section class="view" id="result" hidden>
+  <div class="wrap" id="resultBody"></div>
+</section>
+
+<!-- ZUKAN -->
+<section class="view" id="zukan" hidden>
+  <div class="wrap">
+    <div class="zhead">
+      <h2 class="hand">32タイプ図鑑</h2>
+      <button class="btn ghost small" id="zBack">トップへ</button>
+    </div>
+    <div class="zfilter" id="zfilter"></div>
+    <div class="grid" id="grid"></div>
+  </div>
+</section>
+
+<script>
+const AX = [
+  {k:'開放性', q:'新しさ', color:'var(--c-o)', poles:[
+    {c:'X', n:'実験派', d:'「新しい」がガソリン。画材も画風もどんどん試すので、引き出しの多さは誰にも負けません。そのぶん画風迷子になる日も。',
+     a:['無料ブラシを大量にDLして、結局使うのは2本だけ','描くたびに「絵柄変わった？」と言われる','「今度これ描いてみよう」メモが無限に増えていく']},
+    {c:'K', n:'王道派', d:'好きなものを、好きな描き方で、深く。同じモチーフを描き重ねるうちに、気づけば精度が職人レベルに。',
+     a:['使っているブラシが何年も前から同じ','推しを描いた枚数がもう数えられない','右向きの顔ばかり上手くなっていく']}
+  ]},
+  {k:'誠実性', q:'進め方', color:'var(--c-c)', poles:[
+    {c:'P', n:'計画派', d:'ラフ→線画→塗りの工程がきれい。完成まで持っていく力が強い反面、準備だけで満足しそうになる日もあります。',
+     a:['資料フォルダだけで容量を圧迫している','レイヤーがきっちりフォルダ分けされている','正直ラフの段階がいちばん楽しい']},
+    {c:'I', n:'勢い派', d:'ひらめいた瞬間がいちばん強い。深夜のテンションで名作が生まれる一方、描きかけフォルダもすくすく育ちます。',
+     a:['「レイヤー1」に全部描いている','描きかけのファイルが完成品より多い','気づいたら朝の4時']}
+  ]},
+  {k:'外向性', q:'見せ方', color:'var(--c-e)', poles:[
+    {c:'S', n:'発信派', d:'描いたら見てほしい。反応が燃料になって、仲間とワイワイ描くほど筆がのるタイプです。',
+     a:['投稿時間を見られやすい時間帯に合わせがち','作業通話がないと集中できない','途中経過もついつい上げちゃう']},
+    {c:'H', n:'秘蔵派', d:'絵は自分との対話。見せるより描くこと自体が楽しくて、フォルダの中に宝物が眠っています。',
+     a:['スマホの写真フォルダが落書きで埋まっている','投稿ボタンの前で30分悩んで、そっと閉じる','「絵描けたの！？」と後から驚かれる']}
+  ]},
+  {k:'協調性', q:'描くもの', color:'var(--c-a)', poles:[
+    {c:'Y', n:'寄り添い派', d:'誰かのための一枚がいちばん描ける。お題やリクエスト、流行りを上手に拾える、見る人目線の人です。',
+     a:['誕生日絵を頼まれると張り切りすぎる','流行りのお題タグにすぐ乗る','「描いてほしいキャラいる？」とつい聞いちゃう']},
+    {c:'W', n:'我が道派', d:'描きたいものしか描かない、それがあなたの強さ。刺さる人には深く深く刺さる作風です。',
+     a:['自分の好みにしか反応しない筆','流行りに乗り遅れても特に気にしない','マイナーなジャンルを一人で耕している']}
+  ]},
+  {k:'情緒安定性', q:'心の動き', color:'var(--c-n)', poles:[
+    {c:'T', n:'泰然派', d:'評価に振り回されず、マイペースに描き続けられる。長く続けること自体が才能だとしたら、あなたはかなり強い。',
+     a:['いいねの数を見ずにアプリを閉じられる','スランプ中は普通に他の趣味を楽しんでる','何年たっても楽しそうに描いている']},
+    {c:'J', n:'情熱派', d:'心が大きく動くぶん、絵にも熱がこもる。へこんだ夜も、悔しさを燃料に変えて伸びていくタイプです。',
+     a:['すごい絵を見てへこみ、30分後には模写している','投稿後、5分おきに通知を確認してしまう','昨日の自分の絵を見て布団の中で叫ぶ']}
+  ]}
+];
+
+// key: 1 = poles[0] 寄り, -1 = poles[1] 寄り
+const Q = [
+  {t:'新しいブラシやアプリを見つけると、とりあえず試したくなる', ax:0, key:1},
+  {t:'描き始める前に、ラフや資料集めをしっかりやる', ax:1, key:1},
+  {t:'描き上げたら、その日のうちにSNSに上げたい', ax:2, key:1},
+  {t:'リクエストやお題をもらうと、むしろ描きやすい', ax:3, key:1},
+  {t:'いいねが少なくても、あまり気にならない', ax:4, key:1},
+  {t:'気づけばいつも同じアングル・同じ構図で描いている', ax:0, key:-1},
+  {t:'レイヤー名は「レイヤー87」のまま放置しがち', ax:1, key:-1},
+  {t:'描いた絵のほとんどは、誰にも見せずに眠っている', ax:2, key:-1},
+  {t:'流行りのジャンルより、自分の好きなものしか描けない', ax:3, key:-1},
+  {t:'すごい人の絵を見ると、しばらく描く気がなくなる', ax:4, key:-1},
+  {t:'描いたことのないジャンル（背景・メカ・動物など）にも手を出したい', ax:0, key:1},
+  {t:'「今月は何枚」みたいな目標を決めて、わりと守れる', ax:1, key:1},
+  {t:'絵描き仲間と通話しながら作業するのが好き', ax:2, key:1},
+  {t:'見た人が喜んでくれそうかを考えながら描く', ax:3, key:1},
+  {t:'描けない時期がきても「まあそのうち描ける」と思える', ax:4, key:1},
+  {t:'「いつもの絵柄」がいちばん落ち着くし、あまり変えたくない', ax:0, key:-1},
+  {t:'途中で飽きて、描きかけのファイルがたまっていく', ax:1, key:-1},
+  {t:'作業中の画面を人にのぞかれると、手が止まる', ax:2, key:-1},
+  {t:'「もっとこうしたら」と言われても、自分の解釈は曲げたくない', ax:3, key:-1},
+  {t:'昨日描いた絵が、今日見るとすごく下手に見える', ax:4, key:-1}
+];
+
+const TYPES = {
+  XPSYT:['企画屋プロデューサー','新しいことを思いついて、みんなを巻き込んで、ちゃんと形にする人。',['合同企画の主催をやりがち','企画のスケジュール表を作るのがちょっと楽しい']],
+  XPSYJ:['全力イベンター','誰かを喜ばせたくて、毎回ちょっと無茶な挑戦をしちゃう人。',['企画の前夜は不安で眠れない','反応が温かすぎて画面の前で泣く']],
+  XPSWT:['こだわりの開拓者','自分だけの表現を探しながら、着実に世界へ発信していく人。',['オリジナル世界観の設定資料が分厚い','誰もやっていない表現を見つけるとニヤける']],
+  XPSWJ:['炎のアバンギャルド','尖った表現をぶつけて、心を燃やしながら描く人。',['「わかる人にだけ伝われば」と言いつつ反応はめちゃくちゃ見る','新作を上げるたびに心臓がバクバクする']],
+  XPHYT:['静かな研究者','新しい技法を黙々と研究して、大切な人にだけそっと見せる人。',['技法の研究メモが地味に充実している','友達にだけこっそり描いて渡す']],
+  XPHYJ:['ひみつの努力家','誰にも言わずに練習を積み重ねている、実はすごい人。',['練習量は誰にも言わない','褒められると照れて消えたくなる']],
+  XPHWT:['孤高のラボ職人','自分だけの研究所にこもって、理想の表現を組み立てる人。',['自作ブラシが気づけば何十本もある','見せる予定のない大作をきっちり完成させる']],
+  XPHWJ:['夜更けの錬金術師','理想が高すぎて、完成品がなかなか外に出てこない人。',['完璧を目指した結果、非公開フォルダ行き','新しい技法を試しては自分にダメ出し']],
+  XISYT:['ひらめきムードメーカー','思いつきで描いて、周りまで楽しくしちゃう人。',['思いついた落書きを数分で投稿','通話中の雑談から絵が生まれる']],
+  XISYJ:['ノリで生きる祭り人','盛り上がっている場所には必ずいる、テンション駆動の絵描き。',['お祭り系のタグには全部参加したい','テンションが上がると一晩で3枚描く']],
+  XISWT:['自由すぎる冒険家','ジャンルも画材も気分しだい。それでもちゃんと自分らしい人。',['毎回ジャンルが違うのにフォロワーがついてくる','気分で画材ごと変える']],
+  XISWJ:['爆発する芸術家','感情とひらめきが爆発した瞬間に、とんでもない一枚を生む人。',['深夜に描いた謎の絵がなぜか一番伸びる','翌朝見て消したくなる']],
+  XIHYT:['気まぐれ落書き師','気づけば何か描いている、日常に絵が溶けこんだ人。',['メモの端っこが落書きだらけ','描いた絵をその場で人にあげちゃう']],
+  XIHYJ:['繊細なおすそわけ屋','誰かを想って描くのに、渡す直前で照れちゃう人。',['描いたけど渡せなかった絵がある','相手の反応を想像して手が止まる']],
+  XIHWT:['のんびり実験家','完成より「試してみた」が楽しい、遊び心のかたまり。',['未完成の実験作が山ほどある','「試せたからOK」で満足できる']],
+  XIHWJ:['夢みるカオス職人','頭の中の世界が大きすぎて、手が追いつかない人。',['頭の中の絵がいちばんすごい','アイデアに手が追いつかなくて悶える']],
+  KPSYT:['信頼の看板絵師','安定したクオリティで描き続ける、みんなが頼りにする人。',['定期投稿を何年も続けている','頼まれた絵をちゃんと期限内に仕上げる']],
+  KPSYJ:['推しに尽くす献身家','推しへの愛を、計画的かつ全力で絵にする人。',['推しの誕生日絵は毎年かかさない','公式の供給で情緒がジェットコースター']],
+  KPSWT:['ブレない職人','何があっても、描きたいものを自分の描き方で描く人。',['絵を見ただけで「あの人だ」とわかると言われる','流行りが変わっても描くものは変わらない']],
+  KPSWJ:['頂点をめざす求道者','一枚への熱量がけた違い。細部まで妥協できない人。',['一枚に何十時間もかける','完成後も細かい粗が気になり続ける']],
+  KPHYT:['縁の下の仕上げ人','頼まれたら丁寧に応えてくれる、控えめな実力者。',['頼まれた絵は丁寧に描くのに、自分からは上げない','年賀状や寄せ書きの絵担当になりがち']],
+  KPHYJ:['こっそり推し活絵師','推しの絵でフォルダがいっぱい。でもほぼ非公開の人。',['推しの絵がフォルダにぎっしり','見せる勇気が出るのは年に数回']],
+  KPHWT:['アトリエの修行僧','同じモチーフを淡々と描き続けて、静かに極めていく人。',['同じモチーフを毎日描いている','過去の絵と並べて上達を一人で味わうのが好き']],
+  KPHWJ:['完璧主義の隠れ名人','実はめちゃくちゃ上手いのに、自分だけが認めていない人。',['上手いのに「下手だから」と見せない','描き直しすぎて最初の案が跡形もない']],
+  KISYT:['ゆるふわ日常絵描き','日常のささいなことを、ゆるっと絵にして届ける人。',['日常の一コマをゆるく描いて上げる','推しを見かけたら即描く']],
+  KISYJ:['感情直結型推し絵師','心が動いたその日に描く、推しへの気持ちに正直な人。',['公式の新情報でその日のうちに一枚描く','感想をそのまま絵にしている']],
+  KISWT:['マイペース看板屋','好きなものを好きなときに描く、ブレないゆるさの人。',['好きなキャラを気が向いたときに描く','反応が薄くても本人は満足している']],
+  KISWJ:['熱量で描く一匹狼','刺さったものを勢いで描いて、語りまで止まらない人。',['刺さったものを勢いで描き殴る','絵と長文の語りがセットになりがち']],
+  KIHYT:['おだやかな落書き好き','ペンがあれば描いている、周りをほっこりさせる人。',['手元にペンがあるとつい描いている','家族や友達の似顔絵を描いて喜ばれる']],
+  KIHYJ:['ほっこり内気絵描き','喜んでほしくて描くのに、見せる瞬間は少しドキドキする人。',['渡すときだけ異常に緊張する','下書きのまま何年もたっている絵がある']],
+  KIHWT:['自分だけの楽園の住人','描く理由は「楽しいから」だけ。自分の世界を大事にする人。',['誰にも見せていない自分だけのキャラがいる','描く理由を聞かれても「楽しいから」しかない']],
+  KIHWJ:['真夜中の情熱家','感情があふれた夜にだけ、止まらない筆を持つ人。',['感情が動いた夜だけ筆が止まらない','描き終わった絵をしばらく見返せない']]
+};
+
+// s:強み w:気をつけたいところ h:上達のヒント r:スランプの処方箋 t:おすすめお題
+const PX = {
+  X:{s:'発想の幅が広く、新しい表現を取りこむのが早い',w:'試すこと自体が目的になって、完成まで行かないことがある',h:'「試した技法で1枚だけは完成させる」をルールにすると、実験がそのまま作品に変わります',r:'使ったことのない画材やアプリで、下手でいい落書きを1枚。新鮮さがスイッチを入れてくれます',t:['普段描かないモチーフ（乗り物・食べ物など）','好きな映画のワンシーンを自分の絵柄で']},
+  K:{s:'同じモチーフへの理解が深く、安定した完成度を出せる',w:'得意な型に頼りすぎて、成長が止まったように感じる時期がくる',h:'いつものキャラ・いつもの絵柄のまま「角度だけ」「光源だけ」変えると、無理なく幅が広がります',r:'昔の自分の絵を描き直してみる。上達が目に見えて、また描きたくなります',t:['いつものキャラを苦手な角度で','過去の自分の絵のリメイク']},
+  P:{s:'工程を組み立てられるので、大きな作品も最後まで仕上げられる',w:'準備や資料集めで満足して、描く時間が減ることも',h:'ラフにかける時間の上限を決めると、計画力がそのまま完成スピードにつながります',r:'計画を手放して、タイマー15分のラクガキ。「ちゃんとしなくていい時間」が効きます',t:['15分の時間制限つきクロッキー','構図を3案出してから選ぶ一枚']},
+  I:{s:'ひらめきを一気に形にする瞬発力がある',w:'途中で熱が冷めて、描きかけが増えやすい',h:'描きかけフォルダから1枚選んで「今日はここまで」と小さく区切ると、勢いを完成につなげられます',r:'描きかけの山から、いちばん好きな1枚だけ仕上げる。完成の達成感がエンジンになります',t:['今ふと浮かんだものをそのまま','描きかけファイルの救出']},
+  S:{s:'人とつながる力があり、反応を成長の糧にできる',w:'反応が少ないと、描くモチベーションまで下がりやすい',h:'投稿とは別に「誰にも見せない練習枠」を作ると、数字に左右されない土台ができます',r:'絵描き仲間と作業通話やお題交換。人の熱に当たると、自然と手が動きます',t:['フォロワーさんからのリクエスト','仲間とのお題交換・合作']},
+  H:{s:'評価を気にせず、自分のペースで描きたいものに集中できる',w:'見せる機会が少ないぶん、成長を実感しにくい',h:'月に1枚だけ、信頼できる人に見せてみる。小さな反応が思った以上の栄養になります',r:'スケッチブックを開いて、日付だけ書いて1ページ。自分だけの記録が気持ちを整えてくれます',t:['自分だけの絵日記','誰にも見せない前提の「好き」全開の一枚']},
+  Y:{s:'見る人の気持ちを想像できるので、ちゃんと届く絵が描ける',w:'相手に合わせすぎて、自分の「描きたい」を見失うことがある',h:'リクエストの中にひとつだけ自分のこだわりを忍ばせると、あなたらしさが残ります',r:'誰かに贈る前提で1枚。喜ぶ顔を想像すると、不思議と描けるタイプです',t:['大切な人への誕生日絵','季節のイベント絵']},
+  W:{s:'作風に芯があり、刺さる人には深く刺さる',w:'人の意見を取りこむのが苦手で、伸びしろを逃すことも',h:'アドバイスは「全部は採用しない前提」で聞くと、自分の軸を守りながら吸収できます',r:'誰の目も気にせず、いちばん好きなものだけを描く。原点に戻る一枚が効きます',t:['自分の「好き」を詰めこんだ一枚','オリジナルキャラの新しい一面']},
+  T:{s:'評価やスランプに振り回されず、長く描き続けられる',w:'落ち着いているぶん、伸び悩みに気づきにくいことも',h:'ときどき「ちょっと背伸び」なお題に挑むと、安定感が伸びしろに変わります',r:'描かない時期は気にせず休んで大丈夫。戻るときは、ゆるい一枚から再開を',t:['少し難しめの背景つきの一枚','今までで一番大きいキャンバス']},
+  J:{s:'感情の振れ幅が、そのまま熱のこもった絵になる',w:'人と比べて落ちこみ、描く手が止まりやすい',h:'比べる相手を「過去の自分」だけにすると、心の熱をまっすぐ上達に使えます',r:'へこんだ気持ちそのものを絵にしてみる。感情が大きい人ほど、それが代表作になることも',t:['今の気持ちを色だけで表現','好きな絵の模写（比べるためじゃなく学ぶために）']}
+};
+
+// [口ぐせ, あるある3, あるある4]
+const TX = {
+  XPSYT:['次の企画、もう考えてあるんだよね','企画が終わった瞬間に次の企画を思いつく','参加者の絵を見るのがいちばん楽しい'],
+  XPSYJ:['ぜったい楽しいから、やってみよ！','告知の文章を5回書き直す','企画が終わると燃え尽きて3日寝る'],
+  XPSWT:['誰もやってないなら、自分がやる','新しい技法を解説つきで投稿しがち','作品ごとにコンセプト文がある'],
+  XPSWJ:['この表現、刺さる人には刺さるはず…！','尖った作品ほど投稿前に指が震える','賛否両論が来ると逆に燃える'],
+  XPHYT:['こういうのも描けるようになったよ','研究の成果は親しい人にだけ披露する','画材の比較レビューを自分用に書いている'],
+  XPHYJ:['いや、まだ全然だから…','練習用のスケッチブックが何冊もある','上手い人の「全然練習してない」に本気で驚く'],
+  XPHWT:['完成した。…誰にも見せないけど','自分ルールの制作工程がある','作業BGMまで固定されている'],
+  XPHWJ:['あと少しで理想に届く気がする','完成間際にまた新しい技法を試したくなる','非公開フォルダのほうがレベルが高い'],
+  XISYT:['なんか描けた！見て見て','思いつきの一枚がいちばん反応がいい','ネタ帳がSNSの下書き欄'],
+  XISYJ:['え、そのお祭り参加する！！','期間限定タグにとにかく弱い','勢いで参加表明してから焦る'],
+  XISWT:['今日はこれが描きたい気分','プロフィールのジャンル欄がすぐ古くなる','ハマったものがそのまま絵柄に出る'],
+  XISWJ:['降りてきた…！','感情が高ぶると筆が異常に速い','投稿した直後に消すか本気で迷う'],
+  XIHYT:['はい、これあげる','レシートの裏にも描いている','描いたこと自体をすぐ忘れる'],
+  XIHYJ:['喜んでくれるかな…','手紙に小さな絵を添えがち','渡す絵を何度も描き直す'],
+  XIHWT:['完成？そのうちするかも','変な画材の組み合わせを試しがち','実験の結果を自分だけでニヤニヤ楽しむ'],
+  XIHWJ:['描きたいものが多すぎる…！','寝る前にアイデアが渋滞する','設定だけのキャラが大量にいる'],
+  KPSYT:['今週の分、上げておきました','投稿する曜日が決まっている','「毎週楽しみにしてます」と言われる'],
+  KPSYJ:['推しの誕生日まであと30日…','推しの記念日カレンダーを作っている','公式の供給が来た日は予定が全部飛ぶ'],
+  KPSWT:['流行ってても、描くのはこれ','「作風が完成されてる」と言われる','何年分も同じテーマの作品が並んでいる'],
+  KPSWJ:['まだ、まだ直せる','拡大率800%で作業しがち','投稿後に細部を直して再投稿する'],
+  KPHYT:['いいよ、描いとくね','頼まれた絵がやたら丁寧','自分の作品より頼まれた絵のほうが多い'],
+  KPHYJ:['これは…まだ見せられない','推しへの愛がフォルダの容量でわかる','一度だけ投稿して、すぐ非公開にしたことがある'],
+  KPHWT:['今日も、いつもの一枚','同じキャラのスケッチが何百枚もある','毎日の描く時間が決まっている'],
+  KPHWJ:['下手だから見せられない','周りから「それで下手なら私は…」と言われる','塗りを何度も最初からやり直す'],
+  KISYT:['今日のごはん描いた〜','絵日記がいつの間にか続いている','ゆるい絵ほど反応がいい'],
+  KISYJ:['公式ありがとう…描くしかない','新情報が出た夜は眠れない','ファンアートのタグを毎日巡回している'],
+  KISWT:['好きだから描いてる、それだけ','何年も同じキャラを気ままに描いている','自分のフォロワー数を把握していない'],
+  KISWJ:['聞いて、この良さを描きたい','解釈語りのスレッドがどんどん長くなる','同志を見つけると熱量が倍になる'],
+  KIHYT:['ちょっと描いてみた','子どもや家族に絵をせがまれる','ノートの隅に小さなキャラが住んでいる'],
+  KIHYJ:['気に入ってもらえたらうれしいな','渡すまでに何日も迷う','喜んでもらえた記憶をずっと大事にしている'],
+  KIHWT:['楽しいから描いてるだけ','描いた絵をどこにも上げたことがない','自分だけの世界の地図がある'],
+  KIHWJ:['今夜なら描ける気がする','夜中に描いた絵はいつも色が濃い','朝になると恥ずかしくて見返せない']
+};
+
+// [どんな人？, 描いているとき, 周りから見たあなた, 輝く瞬間]
+const DEEP = {
+  XPSYT:['新しいアイデアを思いつく発想力と、それを最後まで形にする段取り力。あなたはこの二つを両方持っています。しかも一人で楽しむだけでなく、周りを巻きこんで「みんなで描く場」を作れる人。評価に振り回されにくいので、企画がうまくいかなくてもすぐ次に切り替えられます。絵描き仲間の中の、頼れるプロデューサー役です。',
+    '描き始める前から、頭の中に完成図と工程が見えています。新しい技法も「どこで使うか」を決めてから取り入れるので、実験がムダになりにくいタイプ。誰かの顔を思い浮かべながら描くと、いちばん筆がのります。',
+    '「あの人がいると何かが始まる」と思われています。面倒見がよく、初心者にも気さくに声をかけるので、あなたがきっかけで絵を始めた人もいるかもしれません。',
+    'みんなの作品がそろって、企画が形になったとき。自分の絵が褒められるより、場が盛り上がることに幸せを感じるはずです。'],
+  XPSYJ:['誰かを喜ばせたい気持ちと、新しいことへの好奇心が同じくらい強い人。思いついた企画をしっかり準備して、全力で走りきります。そのぶん心の振れ幅も大きく、うまくいけば誰よりも喜び、反応が薄いと誰よりも落ちこむ。でもその熱量こそが、周りを動かす原動力になっています。',
+    '「見た人はどう感じるかな」と考え続けながら描きます。準備は入念なのに、公開直前に不安になって何度も見直すのもいつものこと。完成した瞬間の達成感は人一倍です。',
+    '明るくてエネルギッシュな人に見えています。実は裏でたくさん悩んでいることは、あまり知られていないかもしれません。',
+    '不安を乗りこえて出した作品に、温かい言葉が返ってきたとき。その一言が、次の挑戦へのガソリンになります。'],
+  XPSWT:['新しい表現を探し続け、それを計画的に磨き、堂々と世に出す人。流行よりも「自分が面白いと思うもの」を信じていて、評価が割れても動じません。誰もやっていない表現を見つけたときの喜びが、あなたの一番の燃料です。',
+    '描く前にコンセプトをはっきりさせるタイプ。試行錯誤も楽しみつつ、最終的には狙いどおりの一枚に着地させます。技法やアイデアを言葉で説明するのも得意です。',
+    '「独特の世界観がある人」と一目置かれています。少しとっつきにくく見えることもありますが、話してみると表現への情熱がまっすぐ伝わる人です。',
+    '自分で見つけた表現を誰かが真似して、新しい流れが生まれたとき。開拓者としての喜びを感じる瞬間です。'],
+  XPSWJ:['尖った表現に挑み、それをきっちり作りこみ、勇気を出して発信する人。自分の感性を信じる一方で、心の奥には「わかってほしい」という気持ちも強くあります。その揺れ動きがそのまま作品の熱になり、見る人の心をざわつかせます。',
+    '作りこみは丁寧なのに、気持ちは常に全開。描きながら何度も「これでいいのか」と自問し、そのたびに作品が研ぎ澄まされていきます。',
+    '作品にもあなた自身にも、強い個性を感じられています。熱いファンがつきやすいタイプです。',
+    '「この絵、ずっと忘れられない」と言われたとき。たった一人でも深く刺さったなら、それがあなたにとっての大成功です。'],
+  XPHYT:['新しい技法や画材を探求するのが好きで、それを計画的に自分のものにしていく人。ただ、成果を広く発表することにはあまり興味がなく、大切な人にだけそっと見せる奥ゆかしさがあります。焦らず自分のペースで、確実に上達していくタイプです。',
+    '研究するように描きます。「この塗り方はどういう仕組みだろう」と分解して、試して、記録する。うまくいったときの静かな満足感がたまりません。',
+    '穏やかで物知りな人。「あの人に聞けばわかる」と頼られることが多いかもしれません。',
+    '長く研究してきた技法が、ある日すっと手になじんだとき。誰も見ていなくても、心の中で小さくガッツポーズしているはずです。'],
+  XPHYJ:['新しいことに挑戦し、計画的に練習を積み、それでも「まだまだ」と思っている人。見えないところでの努力量は相当なものなのに、それを表に出すのは照れくさい。誰かに喜んでほしい気持ちはあるけれど、見せる勇気が追いつかない。そんなもどかしさを抱えています。',
+    '練習メニューを決めてコツコツ取り組みます。上手い人の絵を見ると刺激を受けつつ、少し落ちこむことも。それでも手を止めないのがあなたの強さです。',
+    '絵を見せたときに「こんなに上手かったの！？」と驚かれるタイプ。謙虚さが魅力として伝わっています。',
+    '勇気を出して見せた一枚で、誰かが本気で喜んでくれたとき。積み重ねてきた努力が報われたと感じる瞬間です。'],
+  XPHWT:['自分だけの研究所で、理想の表現を追い求める人。新しい技法を取り入れながらも、制作は計画的で着実。人の評価や流行には左右されず、自分が納得できるかどうかだけを基準に描いています。',
+    '自分ルールの制作工程があり、道具も環境もこだわり抜いています。誰にも邪魔されない時間に、黙々と作品を積み上げていくのが至福のひととき。',
+    '謎めいた職人肌の人。作品を見る機会が少ないぶん、見せたときのインパクトは絶大です。',
+    '思い描いていた理想どおりの一枚が完成したとき。誰かの評価より、自分の「よし」がいちばんのご褒美です。'],
+  XPHWJ:['高い理想と探究心を持ち、計画的に作品を作りこむ人。ただ理想が高いぶん、自分の作品になかなかOKが出せません。感性が鋭く、少しのズレも気になってしまう。そのこだわりが、あなたにしか作れない一枚を生み出します。',
+    '夜、静かな時間に集中力が最大になります。新しい技法を試しては「違う」と描き直す。その繰り返しの中で、表現を錬成していきます。',
+    '実力はあるのに作品をあまり出さない、ミステリアスな人と思われています。',
+    '何度も描き直した末に「これだ」と思えた瞬間。その一枚は、きっとあなたの代表作になります。'],
+  XISYT:['思いついたら即行動、描いたら即シェア。軽やかな発想と行動力で、周りの空気まで明るくする人です。計画より勢い、完成度より楽しさ。反応に一喜一憂しないので、とにかくたくさん描いて、たくさん楽しめます。',
+    'ひらめいた瞬間に描き始め、テンションが続くうちに仕上げます。通話しながら、雑談しながら描くのも大好きです。',
+    'いつも楽しそうに描いている人。あなたの投稿を見て「自分も描こう」と思った人はきっと多いはずです。',
+    'ふと描いたラクガキで、誰かが笑ってくれたとき。肩の力が抜けた一枚ほど、あなたらしさが光ります。'],
+  XISYJ:['盛り上がっている場所には必ずいる、テンション駆動の絵描き。新しいお題やイベントに全力で飛びこみ、その場の熱量をそのまま絵にします。感情が豊かで、みんなで楽しむことに誰よりも幸せを感じるタイプです。',
+    '「今この瞬間」を描きます。勢いのある一枚が得意で、ノっているときは驚くほどのスピードで描き上げます。',
+    '場を盛り上げてくれる存在。あなたが参加すると、イベントが一気に賑やかになります。',
+    'お祭り企画の真ん中で、みんなと一緒に盛り上がっているとき。その楽しさが、そのまま作品に写りこみます。'],
+  XISWT:['ジャンルも画材も気分しだい。好奇心のままに描きたいものを描き、それを気軽に発信する自由人です。他人の評価や流行にはあまり興味がなく、「自分が楽しいかどうか」が唯一の基準。それでいて、不思議と人を惹きつけます。',
+    '毎回違うことをしているようで、どこかにあなたらしさが一貫しています。飽きたらやめて、また新しいことへ。その軽やかさが強みです。',
+    '次に何を描くのか予想できない、面白い人。',
+    '新しいジャンルに飛びこんで、思いがけずしっくりきたとき。あなたの冒険は、いつも新しい発見を連れてきます。'],
+  XISWJ:['感情とひらめきが爆発した瞬間に、とんでもない一枚を生み出す人。計画は苦手でも、心が動いたときの集中力は誰にも負けません。自分の感性を信じて発信し、その反応に心を揺さぶられながら、また次の爆発を待っています。',
+    '「降りてきた」瞬間に一気に描きます。描いている間は時間を忘れ、気づけば夜が明けていることも。',
+    '天才肌の人。作品にムラはあっても、ハマったときの一枚は強烈な印象を残します。',
+    '感情が振り切れた夜に、自分でも驚くような一枚が生まれたとき。その瞬間のために描いていると言ってもいいくらいです。'],
+  XIHYT:['気づけば何かを描いている、絵が日常に溶けこんだ人。新しいことにも気軽に手を出し、描いたものを人にあげるのも好き。でも大々的に発表するつもりはなく、ただ描くことそのものを楽しんでいます。描くことが呼吸のような人です。',
+    '計画せずに、手が動くまま描きます。メモの端、レシートの裏、どこでもキャンバスになります。',
+    'ふとした落書きが上手くて驚かれるタイプ。あなたの絵をもらって喜んだ人が、きっといます。',
+    '何気なく描いた落書きを、誰かが「ほしい」と言ってくれたとき。あなたの絵は、日常の小さなプレゼントです。'],
+  XIHYJ:['誰かを想って描くのが好きで、でも渡す直前に照れてしまう人。好奇心旺盛で新しい表現にも挑戦しますが、見せることには少し臆病。心がやさしく繊細だからこそ、あなたの絵には温かさがにじみます。',
+    '相手が喜ぶ顔を想像しながら描きます。途中で「これで喜んでくれるかな」と不安になって、手が止まることも。',
+    'やさしくて気が利く人。絵をもらった人は、その丁寧な気持ちをちゃんと感じています。',
+    '照れながら渡した絵を、相手が大切に飾ってくれていると知ったとき。その温かさを、ずっと覚えていられる人です。'],
+  XIHWT:['完成より「試してみた」が楽しい、遊び心のかたまり。新しい画材や描き方をのんびり試しては、その過程を自分だけで楽しんでいます。評価も完成も気にしない、描くことを純粋に遊べる人です。',
+    '「これとこれを組み合わせたらどうなる？」と実験するように描きます。途中でやめても、それはそれで満足。',
+    '何をしているのか謎だけど、とても楽しそうな人。',
+    '予想外の組み合わせから、見たことのない表現が生まれたとき。その発見を一人でじっくり味わう時間が、あなたの宝物です。'],
+  XIHWJ:['頭の中の世界が大きすぎて、手が追いつかない人。アイデアはあふれるほどあり、感性も鋭い。でも計画的に形にするのは苦手で、描きかけや設定だけのキャラがどんどん増えていきます。そのカオスこそが、あなたの創作の源泉です。',
+    '描きたいものが次々浮かび、一つに集中できずに悶えることも。でもハマったときは、誰にも描けない世界を生み出します。',
+    '作品の断片から、壮大な世界を感じさせる人。',
+    '頭の中にしかなかった世界が、一枚の絵として目の前に現れたとき。その感動は、ほかの何にも代えられません。'],
+  KPSYT:['好きなものを、安定したクオリティで、コツコツ描き続けられる人。計画的で締め切りも守り、周りの期待にもちゃんと応えます。評価に振り回されないので長く続けられ、気づけば「あの人の絵を見るのが楽しみ」と思われる存在に。',
+    '得意な描き方が確立していて、工程にも迷いがありません。安定しているからこそ、見る人のことを考える余裕があります。',
+    '信頼できる人。定期的に作品を届けてくれることに、感謝している人がたくさんいます。',
+    '「いつも楽しみにしてます」と声をかけられたとき。続けてきたことの価値を実感する瞬間です。'],
+  KPSYJ:['推しへの愛を、計画的かつ全力で絵にする人。好きなものへの一途さは誰にも負けず、記念日や誕生日に向けて入念に準備します。感情が豊かで、公式の供給や周りの反応に心が大きく動く。その愛の深さが、見る人の心をつかみます。',
+    '推しの魅力をどう伝えるか、ラフの段階からじっくり考えます。描きながら推しへの気持ちがどんどん高まっていくのがわかります。',
+    '推しへの愛がまっすぐな人。同じものが好きな人から強く共感されています。',
+    '推しの記念日に、準備してきた一枚を届けられたとき。同じ推しを好きな人たちと喜びを分かち合う時間が最高です。'],
+  KPSWT:['何があっても、描きたいものを自分の描き方で描く人。流行にも評価にも左右されず、コツコツと自分の作風を磨き続けてきました。その一貫性が、ほかの誰とも違う「あなたの絵」を作り上げています。',
+    '迷いがありません。自分のやり方を知っていて、それを淡々と積み重ねていきます。',
+    '「絵を見ればあの人だとわかる」と言われる、作風の確立した人。',
+    '何年も前の絵と今の絵を並べて、ブレずに深まってきたことを感じたとき。それがあなたの誇りです。'],
+  KPSWJ:['一枚にかける熱量がけた違いの人。自分の描きたいものを、妥協せず、最高の完成度で仕上げようとします。感性が鋭いぶん自分への要求も高く、完成後も細部が気になり続ける。その向上心が、あなたをどんどん高みへ押し上げます。',
+    '拡大して、細部まで、何度も調整。時間を忘れて没頭します。',
+    '圧倒的な完成度にため息をつかれる人。ストイックさに憧れる人も多いはずです。',
+    '何十時間もかけた一枚を、細部までじっくり見てもらえたとき。こだわりが伝わった喜びは格別です。'],
+  KPHYT:['頼まれたら丁寧に応えてくれる、控えめな実力者。自分から前に出るタイプではないけれど、誰かのために描くときは驚くほどの丁寧さを発揮します。穏やかで安定していて、周りにとって欠かせない存在です。',
+    '相手の希望を丁寧に聞き、計画的に仕上げます。自分の絵より、誰かのための絵のほうが描きやすいと感じることも。',
+    '頼りになる人。年賀状や寄せ書きで、あなたの絵に助けられた人がきっといます。',
+    '頼まれて描いた絵を、相手が「想像以上！」と喜んでくれたとき。縁の下の力が、いちばん報われる瞬間です。'],
+  KPHYJ:['推しの絵がフォルダにいっぱい、でもほとんど非公開の人。好きなものへの愛は深く、描く量も多いのに、見せることには慎重。誰かに喜んでほしい気持ちと、見せるのが怖い気持ちの間で揺れています。',
+    '推しへの気持ちを丁寧にこめて描きます。完成しても「まだ見せられない」とフォルダに保存するのがいつもの流れ。',
+    '実は絵が描けることを知っている人は少ないかも。知られたら驚かれるタイプです。',
+    '思い切って見せた一枚に、同じ推しを好きな人から共感が返ってきたとき。その喜びが、次の一歩を後押しします。'],
+  KPHWT:['同じモチーフを淡々と描き続けて、静かに極めていく人。誰に見せるためでもなく、自分の中の基準に向かって修行のように描き続けます。心が安定していて、スランプもさらりとやり過ごせる、継続の達人です。',
+    '描く時間がだいたい決まっていて、それを淡々とこなします。過去の自分の絵と比べて、少しずつの上達を味わうのが喜び。',
+    '静かで芯の強い人。積み重ねてきた量を知ったら、誰もが驚くはずです。',
+    '昨日より少しだけうまく描けたとき。その小さな前進を、誰よりも正確に感じ取れるのがあなたです。'],
+  KPHWJ:['実はめちゃくちゃ上手いのに、自分だけが認めていない人。描きたいものを丁寧に作りこむ力があり、こだわりも強い。でも理想が高すぎて、なかなか自分にOKが出せません。見せない作品の中に、名作がたくさん眠っています。',
+    '何度も描き直して、理想に近づけようとします。細部まで気になり、最初からやり直すことも。',
+    '作品を見たことがある人は「なんで見せないの！？」と思っています。',
+    '自分の絵を、少しだけ「いいな」と思えたとき。その感覚を大切にすると、あなたはもっと自由に描けるようになります。'],
+  KISYT:['日常のささいなことを、ゆるっと絵にして届ける人。好きなものを気負わず描いて、気軽にシェア。見る人を楽しませる気持ちがありながら、評価はあまり気にしない。その力の抜け具合が、たくさんの人を癒やしています。',
+    '今日あったこと、見かけたもの、好きなもの。身近なことをさらっと描きます。',
+    '癒やし系の人。あなたの投稿を楽しみにしている人がいます。',
+    '何気ない日常の絵に「わかる〜」と共感が集まったとき。毎日の小さな幸せを、絵で分け合える人です。'],
+  KISYJ:['心が動いたその日に描く、推しへの気持ちに正直な人。好きなものがはっきりしていて、新しい情報や展開があると勢いで描き上げます。感情が豊かで、同じものを好きな人たちと一緒に盛り上がることに喜びを感じます。',
+    '感情のままに描きます。「今の気持ちを残したい」という衝動が、筆を動かすいちばんの力です。',
+    '熱い人。同じファン仲間から深く共感されています。',
+    '新情報に心が震えた夜、その気持ちを一枚にぶつけられたとき。感情と絵がぴったり重なる瞬間です。'],
+  KISWT:['好きなものを好きなときに描く、ブレないゆるさの人。描くものは決まっていて、描くタイミングは気分しだい。反応が多くても少なくても気にせず、自分が満足できればそれでいい。そのおおらかさが、長く描き続ける秘訣です。',
+    '気が向いたときに、好きなキャラを好きなように。計画も目標もいりません。',
+    'いつ見ても同じものを楽しそうに描いている人。その一貫性にファンがつきます。',
+    '久しぶりに描いた好きなキャラが、やっぱり楽しかったとき。何年たっても変わらない「好き」があることが、あなたの強さです。'],
+  KISWJ:['刺さったものを勢いで描いて、語りまで止まらない人。自分の好きなものへのこだわりが強く、それを熱く発信します。流行に合わせるのではなく、自分の解釈を貫く。その熱量に共鳴する同志が、少しずつ集まってきます。',
+    '感情が高ぶった瞬間に描きます。絵だけでは伝えきれず、言葉も添えたくなるのがいつものこと。',
+    '熱い語り手。あなたの解釈に影響を受けた人もいるはずです。',
+    '自分の解釈に「まさにそれ！」と共鳴してくれる同志に出会えたとき。一匹狼が、仲間を見つける瞬間です。'],
+  KIHYT:['ペンがあれば描いている、周りをほっこりさせる人。描くものはいつもの好きなもので、気負いはゼロ。誰かを喜ばせるのが好きで、描いた絵を気軽にあげたりもします。穏やかで、描くことが生活の一部になっています。',
+    '手元のペンでさらさらと。ノートの隅や手紙の端に、小さなキャラが生まれます。',
+    '絵をもらったことがある人は、みんなあなたのやさしさを覚えています。',
+    'さっと描いた似顔絵で、家族や友達が笑顔になったとき。あなたの絵は、人と人をつなぐ小さな魔法です。'],
+  KIHYJ:['喜んでほしくて描くのに、見せる瞬間は少しドキドキする人。好きなものを、思いついたときに、心をこめて描きます。感受性が豊かで、喜んでもらえた記憶を大切に持ち続ける、やさしい絵描きです。',
+    '相手のことを思い浮かべながら描きます。描き上げても、渡すまでに何日も迷うことも。',
+    'やさしい人。勇気を出して渡した絵は、相手の宝物になっています。',
+    'ドキドキしながら渡した絵に、とびきりの笑顔が返ってきたとき。その記憶が、また描く勇気をくれます。'],
+  KIHWT:['描く理由は「楽しいから」だけ。自分の世界を大事にしていて、誰かに見せる必要も、評価される必要も感じていません。好きなものを好きなときに描く、その純粋さがあなたの一番の魅力です。',
+    '自分だけのキャラや世界と過ごす時間。計画も締め切りもない、自由な時間です。',
+    '絵を描いていることを知らない人も多いかも。知ったら、その世界の深さに驚かれます。',
+    '自分だけのキャラが、自分の中で少しずつ育っていくのを感じるとき。その世界は、あなただけの楽園です。'],
+  KIHWJ:['感情があふれた夜にだけ、止まらない筆を持つ人。普段は描かない日もあるけれど、心が大きく動いたとき、一気に描き上げます。その絵には、あなたの気持ちがそのまま刻まれています。誰に見せるためでもなく、自分の心と向き合うための絵です。',
+    '夜、一人の時間に、感情のままに描きます。描き終わったときの放心感も含めて、あなたの創作です。',
+    '静かな人に見えて、内側には大きな情熱を秘めている人。',
+    '言葉にできなかった気持ちが、絵になってようやく形を持ったとき。それはあなたにとって、何よりも大切な一枚です。']
+};
+
+// 外部サイトに置いたときは、そのページ自身のURLを共有リンクに使う
+const SHARE_URL = /(\.github\.io|\.netlify\.app|\.pages\.dev|\.vercel\.app)$/.test(location.hostname)
+  ? location.origin + location.pathname
+  : 'https://claude.ai/artifact/7SjxYEy8ooCVUvsGq3z4XE';
+const CODES = [];
+for (const o of 'XK') for (const c of 'PI') for (const e of 'SH') for (const a of 'YW') for (const n of 'TJ') CODES.push(o+c+e+a+n);
+
+function pole(code, i){ return AX[i].poles[AX[i].poles[0].c === code[i] ? 0 : 1]; }
+
+/* ---------- character illustration ---------- */
+function charSVG(code){
+  const idx = CODES.indexOf(code);
+  const hue = Math.round(idx * 360 / 32);
+  const [o,c,e,a,n] = code.split('');
+  const body = `hsl(${hue} 78% 74%)`;
+  const ink = 'var(--line)';
+  let s = `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${TYPES[code][0]}のキャラクター">`;
+  s += `<ellipse cx="100" cy="184" rx="58" ry="7" fill="var(--shadow)"/>`;
+  if (a==='W') s += `<path d="M40 120 C40 38 160 38 160 120" fill="none" stroke="${ink}" stroke-width="7" stroke-linecap="round"/>`;
+  // body
+  s += `<path d="M100 62 C141 60 165 92 163 128 C161 163 135 179 100 179 C63 179 37 161 37 126 C37 90 61 64 100 62Z" fill="${body}" stroke="${ink}" stroke-width="3.5"/>`;
+  if (a==='W') s += `<rect x="27" y="104" width="17" height="32" rx="7" fill="var(--c-a)" stroke="${ink}" stroke-width="3"/><rect x="156" y="104" width="17" height="32" rx="7" fill="var(--c-a)" stroke="${ink}" stroke-width="3"/>`;
+  // 開放性
+  if (o==='X'){
+    s += `<g transform="rotate(-14 100 66)"><ellipse cx="100" cy="66" rx="42" ry="13" fill="var(--c-o)" stroke="${ink}" stroke-width="3"/><circle cx="100" cy="52" r="5" fill="${ink}"/></g>`;
+    s += `<circle cx="72" cy="24" r="5" fill="var(--c-e)"/><circle cx="182" cy="96" r="4.5" fill="var(--c-c)"/><circle cx="20" cy="152" r="4" fill="var(--c-a)"/><circle cx="186" cy="164" r="3.5" fill="var(--c-o)"/><circle cx="60" cy="36" r="2.5" fill="var(--c-n)"/>`;
+  } else {
+    s += `<g transform="rotate(35 150 62)"><rect x="143" y="32" width="14" height="50" fill="var(--c-e)" stroke="${ink}" stroke-width="3"/><path d="M143 82 L150 98 L157 82Z" fill="#F6D8B2" stroke="${ink}" stroke-width="3" stroke-linejoin="round"/><path d="M148 93 L150 98 L152 93Z" fill="${ink}"/><rect x="143" y="24" width="14" height="9" rx="2" fill="var(--c-o)" stroke="${ink}" stroke-width="3"/></g>`;
+  }
+  // 誠実性（勢い派は絵の具汚れ）
+  if (c==='I') s += `<circle cx="52" cy="142" r="6" fill="var(--c-o)"/><circle cx="148" cy="152" r="5" fill="var(--c-c)"/><circle cx="58" cy="160" r="3.5" fill="var(--c-e)"/><circle cx="140" cy="84" r="4" fill="var(--c-n)"/>`;
+  // 目
+  if (n==='T') s += `<path d="M70 114 q8 -9 16 0 M114 114 q8 -9 16 0" fill="none" stroke="${ink}" stroke-width="3.8" stroke-linecap="round"/>`;
+  else s += `<circle cx="78" cy="112" r="8" fill="${ink}"/><circle cx="81" cy="108.5" r="3" fill="#fff"/><circle cx="122" cy="112" r="8" fill="${ink}"/><circle cx="125" cy="108.5" r="3" fill="#fff"/>`;
+  if (c==='P') s += `<circle cx="78" cy="112" r="15" fill="none" stroke="${ink}" stroke-width="3"/><circle cx="122" cy="112" r="15" fill="none" stroke="${ink}" stroke-width="3"/><path d="M93 110 q7 -5 14 0" fill="none" stroke="${ink}" stroke-width="3"/>`;
+  s += `<ellipse cx="60" cy="130" rx="7" ry="4" fill="#FF8FA8" opacity=".7"/><ellipse cx="140" cy="130" rx="7" ry="4" fill="#FF8FA8" opacity=".7"/>`;
+  if (n==='T') s += `<path d="M92 131 q8 7 16 0" fill="none" stroke="${ink}" stroke-width="3.2" stroke-linecap="round"/>`;
+  else s += `<path d="M90 128 q10 13 20 0 z" fill="${ink}" stroke="${ink}" stroke-width="2" stroke-linejoin="round"/>`;
+  // 外向性
+  if (e==='S'){
+    s += `<path d="M46 132 L30 104" stroke="${ink}" stroke-width="4" stroke-linecap="round"/>`;
+    s += `<rect x="15" y="64" width="28" height="42" rx="6" fill="var(--paper)" stroke="${ink}" stroke-width="3"/><path d="M22 76 h14 M22 84 h10" stroke="var(--c-e)" stroke-width="3" stroke-linecap="round"/><path d="M29 94 l0 0" stroke="${ink}" stroke-width="4" stroke-linecap="round"/>`;
+    s += `<path d="M8 58 l-5 -5 M16 52 l0 -7 M46 58 l5 -5" stroke="var(--c-e)" stroke-width="3" stroke-linecap="round"/>`;
+  } else {
+    s += `<rect x="62" y="138" width="76" height="44" rx="4" fill="var(--paper)" stroke="${ink}" stroke-width="3"/>`;
+    for (let x=72; x<=128; x+=11) s += `<circle cx="${x}" cy="138" r="3" fill="var(--paper)" stroke="${ink}" stroke-width="2"/>`;
+    s += `<path d="M76 158 q10 -10 20 0 t20 0" fill="none" stroke="var(--c-o)" stroke-width="3" stroke-linecap="round"/>`;
+    s += `<circle cx="62" cy="160" r="7" fill="${body}" stroke="${ink}" stroke-width="3"/><circle cx="138" cy="160" r="7" fill="${body}" stroke="${ink}" stroke-width="3"/>`;
+  }
+  // 協調性
+  if (a==='Y') s += `<path d="M34 46 C18 34 22 20 34 27 C46 20 50 34 34 46Z" fill="#FF7A9C" stroke="${ink}" stroke-width="2.5" stroke-linejoin="round"/>`;
+  // 情熱派の炎
+  if (n==='J') s += `<path d="M100 4 C111 16 115 26 109 35 C104 42 96 42 91 35 C85 26 91 17 96 21 C96 13 98 9 100 4Z" fill="#FF8A3D" stroke="${ink}" stroke-width="2.5" stroke-linejoin="round"/><path d="M100 22 C104 28 104 33 100 36 C96 33 96 28 100 22Z" fill="#FFD23F"/>`;
+  s += `</svg>`;
+  return s;
+}
+
+/* ---------- view helpers ---------- */
+function show(id){
+  document.querySelectorAll('.view').forEach(v => v.hidden = v.id !== id);
+  window.scrollTo(0,0);
+}
+function esc(t){ return String(t).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+
+/* ---------- home ---------- */
+const stage = document.getElementById('stage');
+function setStage(code){
+  stage.innerHTML = charSVG(code);
+  document.getElementById('stageName').textContent = TYPES[code][0];
+  stage.classList.remove('pop'); void stage.offsetWidth; stage.classList.add('pop');
+}
+let stageCode = CODES[Math.floor(Math.random()*32)];
+setStage(stageCode);
+stage.addEventListener('click', () => {
+  let next; do { next = CODES[Math.floor(Math.random()*32)]; } while (next === stageCode);
+  stageCode = next; setStage(next);
+});
+
+document.getElementById('axesIntro').innerHTML = AX.map(ax =>
+  `<div><span class="dot" style="background:${ax.color}"></span><span><b>${ax.q}：${ax.poles[0].n} ⇔ ${ax.poles[1].n}</b><small>${ax.k}をもとにした軸</small></span></div>`
+).join('');
+
+/* ---------- quiz ---------- */
+let answers = new Array(Q.length).fill(null);
+let qi = 0;
+const VALS = [3,2,1,-1,-2,-3];
+
+function renderQ(){
+  const q = Q[qi], ax = AX[q.ax];
+  document.getElementById('qCount').textContent = `${qi+1} / ${Q.length}`;
+  const tag = document.getElementById('qTag');
+  tag.textContent = ax.q; tag.style.background = ax.color;
+  document.getElementById('qText').textContent = q.t;
+  document.getElementById('progress').innerHTML = Q.map((qq,i) =>
+    `<i class="${i<qi || answers[i]!==null ? 'done':''}" style="background:${i<=qi||answers[i]!==null ? AX[qq.ax].color : ''}"></i>`).join('');
+  const labels = ['とてもあてはまる','あてはまる','ややあてはまる','ややあてはまらない','あてはまらない','まったくあてはまらない'];
+  document.getElementById('scale').innerHTML = VALS.map((v,i) =>
+    `<button class="blob ${answers[qi]===v?'sel':''}" data-v="${v}" aria-label="${labels[i]}"></button>`).join('');
+  document.getElementById('qBack').style.visibility = 'visible';
+}
+document.getElementById('scale').addEventListener('click', ev => {
+  const b = ev.target.closest('.blob'); if (!b) return;
+  answers[qi] = Number(b.dataset.v);
+  b.classList.add('sel');
+  setTimeout(() => {
+    if (qi < Q.length-1){ qi++; renderQ(); }
+    else finish();
+  }, 180);
+});
+document.getElementById('qBack').addEventListener('click', () => {
+  if (qi === 0) { show('home'); return; }
+  qi--; renderQ();
+});
+document.getElementById('startBtn').addEventListener('click', () => {
+  answers = new Array(Q.length).fill(null); qi = 0; renderQ(); show('quiz');
+});
+
+function finish(){
+  const sc = [0,0,0,0,0], first = [null,null,null,null,null];
+  Q.forEach((q,i) => {
+    const v = answers[i] * q.key;
+    sc[q.ax] += v;
+    if (first[q.ax] === null) first[q.ax] = v;
+  });
+  const code = AX.map((ax,i) => {
+    const s = sc[i] !== 0 ? sc[i] : first[i];
+    return s > 0 ? ax.poles[0].c : ax.poles[1].c;
+  }).join('');
+  const pct = sc.map(s => Math.round((s + 12) / 24 * 100));
+  try { localStorage.setItem('ekaki-last', JSON.stringify({code, pct})); } catch(e){}
+  renderResult(code, pct, true);
+}
+
+/* ---------- result ---------- */
+function renderResult(code, pct, mine){
+  const [name, catchline] = TYPES[code];
+  const idx = CODES.indexOf(code);
+  const chips = AX.map((ax,i) => `<span class="chip" style="background:${ax.color}">${pole(code,i).n}</span>`).join('');
+
+  let bars = '';
+  if (pct){
+    bars = `<div class="sec"><h2 class="hand">あなたのバランス</h2>` + AX.map((ax,i) => {
+      const leftWin = code[i] === ax.poles[0].c;
+      return `<div class="bar"><div class="bar-top"><span class="${leftWin?'win':''}">${ax.poles[0].n}</span><span class="${leftWin?'':'win'}">${ax.poles[1].n}</span></div>
+        <div class="track" role="img" aria-label="${ax.poles[0].n} ${pct[i]}%"><b style="width:${pct[i]}%;background:${ax.color}"></b></div>
+        <small>${ax.poles[0].n} ${pct[i]}% ／ ${ax.poles[1].n} ${100-pct[i]}%</small></div>`;
+    }).join('') + `</div>`;
+  }
+
+  const traits = AX.map((ax,i) => {
+    const p = pole(code,i);
+    return `<div class="trait"><span class="dot" style="background:${ax.color}"></span><div><b>${ax.q}：${p.n}</b><p>${p.d}</p></div></div>`;
+  }).join('');
+
+  const tx = TX[code];
+  const dp = DEEP[code];
+  const shareText = `わたしの絵描きタイプは「${name}」でした！\n${catchline}\n\n結果の詳しい解説はこちら👇\n${SHARE_URL}?t=${code}\n#えかきタイプ診断`;
+
+  const flip = (cd, is) => cd.split('').map((ch,i) => is.includes(i) ? (AX[i].poles[0].c===ch ? AX[i].poles[1].c : AX[i].poles[0].c) : ch).join('');
+  const list = key => `<ul class="pts">` + AX.map((ax,i) => {
+    const p = pole(code,i);
+    return `<li><span class="mk" style="background:${ax.color}">${p.n[0]}</span><span><small>${p.n}</small>${PX[p.c][key]}</span></li>`;
+  }).join('') + `</ul>`;
+  const odai = [0,2,3].map((i,j) => { const p = pole(code,i); return `<div>${PX[p.c].t[(idx+j)%2]}<small>${p.n}のあなたに</small></div>`; }).join('');
+  const pals = [
+    [flip(code,[1,2]), '相棒', '好みは近いのに、進め方と見せ方が真逆。足りないところを自然に補い合える組み合わせです。'],
+    [flip(code,[0,3]), 'ライバル', '同じ熱量で、まったく違う方向を向いている相手。作品を見るたびに刺激をもらえます。'],
+    [flip(code,[4]), 'そっくりさん', '描き方はほぼ同じ。心の動き方だけが違うので、話すと「わかる！」が止まりません。']
+  ];
+
+  document.getElementById('resultBody').innerHTML = `
+    <div class="rhead">
+      <p class="kicker">${mine ? 'あなたの絵描きタイプは…' : (renderResult.friend ? '友達の絵描きタイプは…' : 'タイプ図鑑')}</p>
+      ${charSVG(code)}
+      <div class="quote hand">「${tx[0]}」</div>
+      <h1 class="rname hand">${name}</h1>
+      <p class="rcatch">${catchline}</p>
+      <div class="chips">${chips}</div>
+      <div class="code">${code}</div>
+    </div>
+    <div class="sec deep"><h2 class="hand">${name}ってどんな人？</h2>
+      <p>${dp[0]}</p>
+      <h3>描いているときのあなた</h3><p>${dp[1]}</p>
+      <h3>周りから見たあなた</h3><p>${dp[2]}</p>
+      <h3>あなたが一番輝く瞬間</h3><p>${dp[3]}</p>
+    </div>
+    ${bars}
+    <div class="sec"><h2 class="hand">5つの軸で見るあなたの描き方</h2>${traits}</div>
+    <div class="sec"><h2 class="hand">あなたの強み</h2>${list('s')}</div>
+    <div class="sec"><h2 class="hand">ちょっと気をつけたいところ</h2><p class="intro">弱点というより、強みの裏側です。</p>${list('w')}</div>
+    <div class="sec"><h2 class="hand">もっと伸びるためのヒント</h2>${list('h')}</div>
+    <div class="sec"><h2 class="hand">描けないときの処方箋</h2><p class="intro">スランプが来たら、どれかひとつ試してみてください。</p>${list('r')}</div>
+    <div class="sec"><h2 class="hand">次に描いてみたいお題</h2><div class="odai">${odai}</div></div>
+    <div class="sec"><h2 class="hand">相性のいいタイプ</h2><div class="pals">
+      ${pals.map(([c,r,d]) => `<button class="pal" data-code="${c}">${charSVG(c)}<span><span class="role">${r}</span><b>${TYPES[c][0]}</b><small>${d}</small></span></button>`).join('')}
+    </div></div>
+    <div class="rbtns">
+      ${mine ? `<a class="btn small line" id="lineBtn" target="_blank" rel="noopener" href="https://line.me/R/share?text=${encodeURIComponent(shareText)}">LINEで送る</a>
+      <button class="btn small" id="shareBtn">ほかのアプリで共有</button>
+      <button class="btn ghost small" id="copyBtn">結果をコピー</button>` : ''}
+      <button class="btn ${renderResult.friend ? '' : 'ghost '}small" id="retryBtn">${mine ? 'もう一度診断する' : '自分も診断する'}</button>
+      <button class="btn ghost small" id="toZukan">32タイプ図鑑</button>
+      <button class="btn ghost small" id="toHome">トップへ</button>
+    </div>
+    <p class="toast" id="toast" aria-live="polite"></p>`;
+
+  const body = document.getElementById('resultBody');
+  body.querySelectorAll('.pal').forEach(b => b.addEventListener('click', e => renderResult(e.currentTarget.dataset.code, null, false)));
+  body.querySelector('#retryBtn').addEventListener('click', () => document.getElementById('startBtn').click());
+  body.querySelector('#toZukan').addEventListener('click', () => { renderZukan(); show('zukan'); });
+  body.querySelector('#toHome').addEventListener('click', () => { refreshLast(); show('home'); });
+  const sb = body.querySelector('#shareBtn');
+  if (sb) sb.addEventListener('click', async () => {
+    const t = document.getElementById('toast');
+    if (navigator.share){
+      try { await navigator.share({text: shareText}); } catch(e){}
+    } else {
+      try { await navigator.clipboard.writeText(shareText); t.textContent = 'この端末では共有メニューが使えないので、文章をコピーしました'; }
+      catch(e){ t.textContent = '共有できませんでした。「結果をコピー」を使ってください'; }
+    }
+  });
+  const cb = body.querySelector('#copyBtn');
+  if (cb) cb.addEventListener('click', async () => {
+    const text = shareText;
+    const t = document.getElementById('toast');
+    try { await navigator.clipboard.writeText(text); t.textContent = 'コピーしました'; }
+    catch(e){ t.textContent = 'コピーできませんでした。長押しで選択してコピーしてください'; }
+  });
+  show('result');
+}
+
+/* ---------- zukan ---------- */
+let zf = 'all';
+function renderZukan(){
+  const filters = [['all','ぜんぶ'], ...AX.flatMap(ax => ax.poles.map(p => [p.c, p.n]))];
+  document.getElementById('zfilter').innerHTML = filters.map(([k,l]) =>
+    `<button data-f="${k}" aria-pressed="${zf===k}">${l}</button>`).join('');
+  document.getElementById('grid').innerHTML = CODES.filter(c => zf==='all' || c.includes(zf)).map(c =>
+    `<button class="zc" data-code="${c}">${charSVG(c)}<b>${TYPES[c][0]}</b><small>${c}</small></button>`).join('');
+}
+document.getElementById('zfilter').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  zf = b.dataset.f; renderZukan();
+});
+document.getElementById('grid').addEventListener('click', e => {
+  const b = e.target.closest('.zc'); if (!b) return;
+  renderResult(b.dataset.code, null, false);
+});
+document.getElementById('zukanBtn').addEventListener('click', () => { renderZukan(); show('zukan'); });
+document.getElementById('zBack').addEventListener('click', () => { refreshLast(); show('home'); });
+
+/* ---------- last result ---------- */
+function refreshLast(){
+  const btn = document.getElementById('lastBtn');
+  let last = null;
+  try { last = JSON.parse(localStorage.getItem('ekaki-last') || 'null'); } catch(e){}
+  if (last && TYPES[last.code]){
+    btn.hidden = false;
+    btn.onclick = () => renderResult(last.code, last.pct, true);
+  } else btn.hidden = true;
+}
+refreshLast();
+
+/* ---------- 共有リンクから開いたとき ---------- */
+(function(){
+  let t = null;
+  try {
+    const q = new URLSearchParams(location.search);
+    t = q.get('t');
+    if (!t && location.hash) t = new URLSearchParams(location.hash.slice(1)).get('t');
+  } catch(e){}
+  if (t && TYPES[t.toUpperCase()]){
+    renderResult.friend = true;
+    renderResult(t.toUpperCase(), null, false);
+    renderResult.friend = false;
+  }
+})();
+</script>
+</body>
+</html>
